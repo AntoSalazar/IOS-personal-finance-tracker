@@ -6,41 +6,34 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background gradient
-                LinearGradient(
-                    colors: [
-                        Color.appBackground,
-                        Color.appMuted.opacity(0.2)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
+                // Background
+                Color.appBackground
+                    .ignoresSafeArea()
 
                 VStack(spacing: AppSpacing.xl) {
                     Spacer()
 
-                    // Welcome message with glass container
-                    GlassEffectContainer {
-                        VStack(spacing: AppSpacing.md) {
-                            Image(systemName: "chart.pie.fill")
-                                .font(.system(size: 72))
-                                .foregroundStyle(Color.appPrimary)
-                                .padding(AppSpacing.lg)
-                                .glassEffect(.regular, in: .circle)
+                    // Welcome message
+                    VStack(spacing: AppSpacing.md) {
+                        Image(systemName: "chart.pie.fill")
+                            .font(.system(size: 72))
+                            .foregroundStyle(Color.appPrimary)
+                            .padding(AppSpacing.lg)
+                            .background(Color.appSecondary)
+                            .clipShape(Circle())
 
-                            if let user = authViewModel.state.currentUser {
-                                Text("Welcome, \(user.name)!")
-                                    .font(.title.bold())
-                                    .foregroundStyle(Color.appForeground)
+                        if let user = authViewModel.state.currentUser {
+                            Text("Welcome, \(user.name)!")
+                                .font(.title.bold())
+                                .foregroundStyle(Color.appForeground)
 
-                                Text(user.email)
-                                    .font(.subheadline)
-                                    .foregroundStyle(Color.appMutedForeground)
-                                    .padding(.horizontal, AppSpacing.md)
-                                    .padding(.vertical, AppSpacing.xs)
-                                    .glassEffect(.regular, in: .capsule)
-                            }
+                            Text(user.email)
+                                .font(.subheadline)
+                                .foregroundStyle(Color.appMutedForeground)
+                                .padding(.horizontal, AppSpacing.md)
+                                .padding(.vertical, AppSpacing.xs)
+                                .background(Color.appSecondary)
+                                .clipShape(Capsule())
                         }
                     }
 
@@ -65,7 +58,7 @@ struct HomeView: View {
                             AppButton(
                                 title: "Add Transaction",
                                 icon: "plus.circle.fill",
-                                variant: .glass,
+                                variant: .primary,
                                 fullWidth: true
                             ) {
                                 // TODO: Navigate to add transaction
@@ -76,7 +69,7 @@ struct HomeView: View {
 
                     Spacer()
 
-                    // Bottom action bar with glass
+                    // Bottom action bar
                     HStack(spacing: AppSpacing.md) {
                         ActionButton(icon: "house.fill", label: "Home", isSelected: true)
                         ActionButton(icon: "list.bullet.rectangle", label: "Transactions")
@@ -85,7 +78,13 @@ struct HomeView: View {
                     }
                     .padding(.horizontal, AppSpacing.lg)
                     .padding(.vertical, AppSpacing.md)
-                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.xl))
+                    .background(Color.appCard)
+                    .clipShape(RoundedRectangle(cornerRadius: AppRadius.xl))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AppRadius.xl)
+                            .stroke(Color.appBorder, lineWidth: 1)
+                    )
+                    .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: -4)
                     .padding(.horizontal, AppSpacing.lg)
                     .padding(.bottom, AppSpacing.md)
                 }
@@ -99,8 +98,11 @@ struct HomeView: View {
                     } label: {
                         Image(systemName: "rectangle.portrait.and.arrow.right")
                             .font(.body.weight(.medium))
+                            .foregroundStyle(Color.appForeground)
                     }
-                    .glassEffect(.regular.interactive(), in: .circle)
+                    .padding(AppSpacing.sm)
+                    .background(Color.appSecondary)
+                    .clipShape(Circle())
                 }
             }
             .navigationTitle("Finance Tracker")

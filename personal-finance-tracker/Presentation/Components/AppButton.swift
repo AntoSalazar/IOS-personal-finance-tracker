@@ -7,7 +7,6 @@ enum AppButtonVariant {
     case outline
     case ghost
     case link
-    case glass
 }
 
 enum AppButtonSize {
@@ -57,14 +56,6 @@ struct AppButton: View {
     @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
-        if variant == .glass {
-            glassButton
-        } else {
-            standardButton
-        }
-    }
-
-    private var standardButton: some View {
         Button(action: action) {
             buttonContent
                 .frame(maxWidth: fullWidth ? .infinity : nil)
@@ -81,26 +72,12 @@ struct AppButton: View {
         .animation(.appFast, value: isDisabled)
     }
 
-    private var glassButton: some View {
-        Button(action: action) {
-            buttonContent
-                .frame(maxWidth: fullWidth ? .infinity : nil)
-                .frame(height: size.height)
-                .padding(.horizontal, size.horizontalPadding)
-        }
-        .disabled(isLoading || isDisabled || !isEnabled)
-        .opacity(effectiveOpacity)
-        .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: AppRadius.lg))
-        .animation(.appFast, value: isLoading)
-        .animation(.appFast, value: isDisabled)
-    }
-
     private var buttonContent: some View {
         HStack(spacing: AppSpacing.sm) {
             if isLoading {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle())
-                    .tint(variant == .glass ? .primary : foregroundColor)
+                    .tint(foregroundColor)
                     .scaleEffect(0.8)
             } else if let icon {
                 Image(systemName: icon)
@@ -127,7 +104,7 @@ struct AppButton: View {
             Color.appSecondary
         case .destructive:
             Color.appDestructive
-        case .outline, .ghost, .link, .glass:
+        case .outline, .ghost, .link:
             Color.clear
         }
     }
@@ -146,8 +123,6 @@ struct AppButton: View {
             return Color.appForeground
         case .link:
             return Color.appPrimary
-        case .glass:
-            return Color.appForeground
         }
     }
 
@@ -167,10 +142,10 @@ struct AppButton: View {
     VStack(spacing: 16) {
         AppButton(title: "Primary Button", variant: .primary) {}
         AppButton(title: "Secondary", variant: .secondary) {}
-        AppButton(title: "Glass Button", icon: "sparkles", variant: .glass) {}
-        AppButton(title: "Glass Full Width", variant: .glass, fullWidth: true) {}
+        AppButton(title: "Destructive", icon: "trash", variant: .destructive) {}
         AppButton(title: "Outline", variant: .outline) {}
-        AppButton(title: "Loading...", variant: .glass, isLoading: true) {}
+        AppButton(title: "Ghost", variant: .ghost) {}
+        AppButton(title: "Loading...", variant: .primary, isLoading: true) {}
     }
     .padding()
 }

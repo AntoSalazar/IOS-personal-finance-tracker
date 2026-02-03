@@ -14,36 +14,28 @@ struct RegisterView: View {
 
     var body: some View {
         ZStack {
-            // Background gradient
-            LinearGradient(
-                colors: [
-                    Color.appBackground,
-                    Color.appMuted.opacity(0.3)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            // Background
+            Color.appBackground
+                .ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: AppSpacing.xl) {
-                    // Header with glass effect
-                    GlassEffectContainer {
-                        VStack(spacing: AppSpacing.md) {
-                            Image(systemName: "chart.pie.fill")
-                                .font(.system(size: 56))
-                                .foregroundStyle(Color.appPrimary)
-                                .padding(AppSpacing.lg)
-                                .glassEffect(.regular, in: .circle)
+                    // Header
+                    VStack(spacing: AppSpacing.md) {
+                        Image(systemName: "chart.pie.fill")
+                            .font(.system(size: 56))
+                            .foregroundStyle(Color.appPrimary)
+                            .padding(AppSpacing.lg)
+                            .background(Color.appSecondary)
+                            .clipShape(Circle())
 
-                            Text("Create an account")
-                                .font(.largeTitle.bold())
-                                .foregroundStyle(Color.appForeground)
+                        Text("Create an account")
+                            .font(.largeTitle.bold())
+                            .foregroundStyle(Color.appForeground)
 
-                            Text("Enter your details to get started")
-                                .font(.subheadline)
-                                .foregroundStyle(Color.appMutedForeground)
-                        }
+                        Text("Enter your details to get started")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.appMutedForeground)
                     }
                     .padding(.top, AppSpacing.xl)
 
@@ -99,7 +91,7 @@ struct RegisterView: View {
                             AppButton(
                                 title: "Create Account",
                                 icon: "person.badge.plus",
-                                variant: .glass,
+                                variant: .primary,
                                 size: .lg,
                                 isLoading: viewModel.state.isLoading,
                                 fullWidth: true,
@@ -116,7 +108,7 @@ struct RegisterView: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, AppSpacing.md)
 
-                    // Footer with glass pill
+                    // Footer
                     HStack(spacing: AppSpacing.xs) {
                         Text("Already have an account?")
                             .foregroundStyle(Color.appMutedForeground)
@@ -124,8 +116,8 @@ struct RegisterView: View {
                         Button(action: onNavigateToLogin) {
                             Text("Sign in")
                                 .fontWeight(.semibold)
+                                .foregroundStyle(Color.appPrimary)
                         }
-                        .glassEffect(.regular.interactive(), in: .capsule)
                     }
                     .font(.subheadline)
 

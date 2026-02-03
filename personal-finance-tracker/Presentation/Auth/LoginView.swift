@@ -13,36 +13,28 @@ struct LoginView: View {
 
     var body: some View {
         ZStack {
-            // Background gradient
-            LinearGradient(
-                colors: [
-                    Color.appBackground,
-                    Color.appMuted.opacity(0.3)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            // Background
+            Color.appBackground
+                .ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: AppSpacing.xl) {
-                    // Header with glass effect
-                    GlassEffectContainer {
-                        VStack(spacing: AppSpacing.md) {
-                            Image(systemName: "chart.pie.fill")
-                                .font(.system(size: 56))
-                                .foregroundStyle(Color.appPrimary)
-                                .padding(AppSpacing.lg)
-                                .glassEffect(.regular, in: .circle)
+                    // Header
+                    VStack(spacing: AppSpacing.md) {
+                        Image(systemName: "chart.pie.fill")
+                            .font(.system(size: 56))
+                            .foregroundStyle(Color.appPrimary)
+                            .padding(AppSpacing.lg)
+                            .background(Color.appSecondary)
+                            .clipShape(Circle())
 
-                            Text("Welcome back")
-                                .font(.largeTitle.bold())
-                                .foregroundStyle(Color.appForeground)
+                        Text("Welcome back")
+                            .font(.largeTitle.bold())
+                            .foregroundStyle(Color.appForeground)
 
-                            Text("Sign in to your account to continue")
-                                .font(.subheadline)
-                                .foregroundStyle(Color.appMutedForeground)
-                        }
+                        Text("Sign in to your account to continue")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.appMutedForeground)
                     }
                     .padding(.top, AppSpacing.xxl)
 
@@ -87,7 +79,7 @@ struct LoginView: View {
                             AppButton(
                                 title: "Sign In",
                                 icon: "arrow.right",
-                                variant: .glass,
+                                variant: .primary,
                                 size: .lg,
                                 isLoading: viewModel.state.isLoading,
                                 fullWidth: true,
@@ -97,7 +89,7 @@ struct LoginView: View {
                         }
                     }
 
-                    // Footer with glass pill
+                    // Footer
                     HStack(spacing: AppSpacing.xs) {
                         Text("Don't have an account?")
                             .foregroundStyle(Color.appMutedForeground)
@@ -105,8 +97,8 @@ struct LoginView: View {
                         Button(action: onNavigateToRegister) {
                             Text("Sign up")
                                 .fontWeight(.semibold)
+                                .foregroundStyle(Color.appPrimary)
                         }
-                        .glassEffect(.regular.interactive(), in: .capsule)
                     }
                     .font(.subheadline)
 
