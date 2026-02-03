@@ -10,126 +10,135 @@ struct HomeView: View {
                 Color.appBackground
                     .ignoresSafeArea()
 
-                VStack(spacing: AppSpacing.xl) {
-                    Spacer()
-
-                    // Welcome message
-                    VStack(spacing: AppSpacing.md) {
-                        Image(systemName: "chart.pie.fill")
-                            .font(.system(size: 72))
-                            .foregroundStyle(Color.appPrimary)
-                            .padding(AppSpacing.lg)
-                            .background(Color.appSecondary)
-                            .clipShape(Circle())
-
-                        if let user = authViewModel.state.currentUser {
-                            Text("Welcome, \(user.name)!")
-                                .font(.title.bold())
-                                .foregroundStyle(Color.appForeground)
-
-                            Text(user.email)
-                                .font(.subheadline)
-                                .foregroundStyle(Color.appMutedForeground)
-                                .padding(.horizontal, AppSpacing.md)
-                                .padding(.vertical, AppSpacing.xs)
+                ScrollView {
+                    VStack(spacing: AppSpacing.xl) {
+                        // Welcome message
+                        VStack(spacing: AppSpacing.md) {
+                            Image(systemName: "chart.pie.fill")
+                                .font(.system(size: 72))
+                                .foregroundStyle(Color.appPrimary)
+                                .padding(AppSpacing.lg)
                                 .background(Color.appSecondary)
-                                .clipShape(Capsule())
-                        }
-                    }
+                                .clipShape(Circle())
 
-                    Spacer()
+                            if let user = authViewModel.state.currentUser {
+                                Text("Welcome, \(user.name)!")
+                                    .font(.title.bold())
+                                    .foregroundStyle(Color.appForeground)
 
-                    // Dashboard card
-                    AppCard {
-                        VStack(alignment: .leading, spacing: AppSpacing.md) {
-                            HStack {
-                                Image(systemName: "square.grid.2x2")
-                                    .font(.title2)
-                                    .foregroundStyle(Color.appPrimary)
-                                Text("Your Dashboard")
-                                    .font(.headline)
-                                    .foregroundStyle(Color.appCardForeground)
-                            }
-
-                            Text("This is where your financial overview will appear. Start by adding your first transaction.")
-                                .font(.subheadline)
-                                .foregroundStyle(Color.appMutedForeground)
-
-                            AppButton(
-                                title: "Add Transaction",
-                                icon: "plus.circle.fill",
-                                variant: .primary,
-                                fullWidth: true
-                            ) {
-                                // TODO: Navigate to add transaction
+                                Text(user.email)
+                                    .font(.subheadline)
+                                    .foregroundStyle(Color.appMutedForeground)
+                                    .padding(.horizontal, AppSpacing.md)
+                                    .padding(.vertical, AppSpacing.xs)
+                                    .background(Color.appSecondary)
+                                    .clipShape(Capsule())
                             }
                         }
-                    }
-                    .padding(.horizontal, AppSpacing.lg)
+                        .padding(.top, AppSpacing.xl)
 
-                    Spacer()
-
-                    // Bottom action bar
-                    HStack(spacing: AppSpacing.md) {
-                        ActionButton(icon: "house.fill", label: "Home", isSelected: true)
-                        ActionButton(icon: "list.bullet.rectangle", label: "Transactions")
-                        ActionButton(icon: "chart.bar.fill", label: "Analytics")
-                        ActionButton(icon: "gearshape.fill", label: "Settings")
-                    }
-                    .padding(.horizontal, AppSpacing.lg)
-                    .padding(.vertical, AppSpacing.md)
-                    .background(Color.appCard)
-                    .clipShape(RoundedRectangle(cornerRadius: AppRadius.xl))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: AppRadius.xl)
-                            .stroke(Color.appBorder, lineWidth: 1)
-                    )
-                    .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: -4)
-                    .padding(.horizontal, AppSpacing.lg)
-                    .padding(.bottom, AppSpacing.md)
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        Task {
-                            await authViewModel.signOut()
+                        // Quick Stats
+                        HStack(spacing: AppSpacing.md) {
+                            QuickStatCard(
+                                title: "Income",
+                                value: "$0.00",
+                                icon: "arrow.down.circle.fill",
+                                color: Color.appChart2
+                            )
+                            
+                            QuickStatCard(
+                                title: "Expenses",
+                                value: "$0.00",
+                                icon: "arrow.up.circle.fill",
+                                color: Color.appChart1
+                            )
                         }
-                    } label: {
-                        Image(systemName: "rectangle.portrait.and.arrow.right")
-                            .font(.body.weight(.medium))
-                            .foregroundStyle(Color.appForeground)
+                        .padding(.horizontal, AppSpacing.lg)
+
+                        // Dashboard card
+                        AppCard {
+                            VStack(alignment: .leading, spacing: AppSpacing.md) {
+                                HStack {
+                                    Image(systemName: "square.grid.2x2")
+                                        .font(.title2)
+                                        .foregroundStyle(Color.appPrimary)
+                                    Text("Your Dashboard")
+                                        .font(.headline)
+                                        .foregroundStyle(Color.appCardForeground)
+                                }
+
+                                Text("This is where your financial overview will appear. Start by adding your first transaction.")
+                                    .font(.subheadline)
+                                    .foregroundStyle(Color.appMutedForeground)
+
+                                AppButton(
+                                    title: "Add Transaction",
+                                    icon: "plus.circle.fill",
+                                    variant: .primary,
+                                    fullWidth: true
+                                ) {
+                                    // TODO: Navigate to add transaction
+                                }
+                            }
+                        }
+                        .padding(.horizontal, AppSpacing.lg)
+
+                        // Recent Transactions
+                        AppCard {
+                            VStack(alignment: .leading, spacing: AppSpacing.md) {
+                                HStack {
+                                    Text("Recent Transactions")
+                                        .font(.headline)
+                                        .foregroundStyle(Color.appCardForeground)
+                                    Spacer()
+                                    Button("See All") {}
+                                        .font(.subheadline.weight(.medium))
+                                        .foregroundStyle(Color.appPrimary)
+                                }
+
+                                Text("No transactions yet")
+                                    .font(.subheadline)
+                                    .foregroundStyle(Color.appMutedForeground)
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                                    .padding(.vertical, AppSpacing.lg)
+                            }
+                        }
+                        .padding(.horizontal, AppSpacing.lg)
+                        .padding(.bottom, AppSpacing.lg)
                     }
-                    .padding(AppSpacing.sm)
-                    .background(Color.appSecondary)
-                    .clipShape(Circle())
                 }
             }
-            .navigationTitle("Finance Tracker")
+            .navigationTitle("Home")
             .navigationBarTitleDisplayMode(.large)
         }
     }
 }
 
-// MARK: - Action Button
+// MARK: - Quick Stat Card
 
-private struct ActionButton: View {
+private struct QuickStatCard: View {
+    let title: String
+    let value: String
     let icon: String
-    let label: String
-    var isSelected: Bool = false
-
+    let color: Color
+    
     var body: some View {
-        Button {
-            // TODO: Handle navigation
-        } label: {
-            VStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                Text(label)
-                    .font(.caption2)
+        AppCard {
+            VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                HStack {
+                    Image(systemName: icon)
+                        .foregroundStyle(color)
+                    Spacer()
+                }
+                
+                Text(value)
+                    .font(.title2.bold())
+                    .foregroundStyle(Color.appCardForeground)
+                
+                Text(title)
+                    .font(.caption)
+                    .foregroundStyle(Color.appMutedForeground)
             }
-            .frame(maxWidth: .infinity)
-            .foregroundStyle(isSelected ? Color.appPrimary : Color.appMutedForeground)
         }
     }
 }

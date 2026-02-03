@@ -14,7 +14,7 @@ struct RootView: View {
                 LoadingView(message: "Loading...")
 
             case .authenticated:
-                HomeView(authViewModel: authViewModel)
+                MainTabView(authViewModel: authViewModel)
                     .transition(.opacity.combined(with: .scale(scale: 0.95)))
 
             case .unauthenticated, .error:
