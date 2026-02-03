@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct personal_finance_trackerApp: App {
+    @State private var container = AppContainer()
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -25,7 +27,7 @@ struct personal_finance_trackerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView(container: container)
         }
         .modelContainer(sharedModelContainer)
     }
