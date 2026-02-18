@@ -2,69 +2,112 @@ import SwiftUI
 
 struct MainTabView: View {
     @Bindable var authViewModel: AuthViewModel
+    let container: AppContainer
     @State private var selectedTab: AppTab = .home
     @State private var badges: [AppTab: Int] = [:]
-    
+
+    // ViewModels
+    @State private var accountsViewModel: AccountsViewModel?
+    @State private var transactionsViewModel: TransactionsViewModel?
+    @State private var categoriesViewModel: CategoriesViewModel?
+    @State private var subscriptionsViewModel: SubscriptionsViewModel?
+    @State private var debtsViewModel: DebtsViewModel?
+    @State private var cryptoViewModel: CryptoViewModel?
+    @State private var statisticsViewModel: StatisticsViewModel?
+
     var body: some View {
         VStack(spacing: 0) {
             // Tab Content
             Group {
                 switch selectedTab {
                 case .home:
-                    HomeView(authViewModel: authViewModel)
+                    HomeView(
+                        authViewModel: authViewModel,
+                        transactionsViewModel: transactionsVM,
+                        statisticsViewModel: statisticsVM,
+                        accounts: accountsVM.state.accounts,
+                        categories: categoriesVM.categories
+                    )
                 case .accounts:
-                    AccountsView()
+                    AccountsView(viewModel: accountsVM)
                 case .transactions:
-                    TransactionsView()
+                    TransactionsView(
+                        viewModel: transactionsVM,
+                        accounts: accountsVM.state.accounts,
+                        categories: categoriesVM.categories
+                    )
                 case .stats:
-                    StatsView()
+                    StatsView(
+                        statisticsViewModel: statisticsVM,
+                        cryptoViewModel: cryptoVM
+                    )
                 case .settings:
-                    SettingsView(authViewModel: authViewModel)
+                    SettingsView(
+                        authViewModel: authViewModel,
+                        categoriesViewModel: categoriesVM,
+                        exportAPI: container.exportAPI
+                    )
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            
+
             // Custom Tab Bar
             AppTabBar(selectedTab: $selectedTab, badges: badges)
         }
         .ignoresSafeArea(.keyboard)
+        .task {
+            await categoriesVM.loadCategories()
+        }
     }
-}
 
-#Preview {
-    @Previewable @State var mockViewModel = AuthViewModel(
-        signInUseCase: SignInUseCase(repository: MockPreviewAuthRepository()),
-        signUpUseCase: SignUpUseCase(repository: MockPreviewAuthRepository()),
-        signOutUseCase: SignOutUseCase(repository: MockPreviewAuthRepository()),
-        getSessionUseCase: GetSessionUseCase(repository: MockPreviewAuthRepository())
-    )
-    
-    return MainTabView(authViewModel: mockViewModel)
-}
+    // MARK: - Lazy ViewModel Access
 
-// MARK: - Mock for Preview
-
-private final class MockPreviewAuthRepository: AuthRepository {
-    func signIn(credentials: SignInCredentials) async throws -> AuthSession {
-        AuthSession(
-            user: User(id: "1", email: credentials.email, name: "Test User"),
-            session: Session(id: "s1", expiresAt: Date().addingTimeInterval(3600))
-        )
+    private var accountsVM: AccountsViewModel {
+        if let vm = accountsViewModel { return vm }
+        let vm = container.makeAccountsViewModel()
+        Task { @MainActor in accountsViewModel = vm }
+        return vm
     }
-    
-    func signUp(credentials: SignUpCredentials) async throws -> AuthSession {
-        AuthSession(
-            user: User(id: "1", email: credentials.email, name: credentials.name),
-            session: Session(id: "s1", expiresAt: Date().addingTimeInterval(3600))
-        )
+
+    private var transactionsVM: TransactionsViewModel {
+        if let vm = transactionsViewModel { return vm }
+        let vm = container.makeTransactionsViewModel()
+        Task { @MainActor in transactionsViewModel = vm }
+        return vm
     }
-    
-    func signOut() async throws {}
-    
-    func getSession() async throws -> AuthSession? {
-        AuthSession(
-            user: User(id: "1", email: "test@example.com", name: "Test User"),
-            session: Session(id: "s1", expiresAt: Date().addingTimeInterval(3600))
-        )
+
+    private var categoriesVM: CategoriesViewModel {
+        if let vm = categoriesViewModel { return vm }
+        let vm = container.makeCategoriesViewModel()
+        Task { @MainActor in categoriesViewModel = vm }
+        return vm
+    }
+
+    private var subscriptionsVM: SubscriptionsViewModel {
+        if let vm = subscriptionsViewModel { return vm }
+        let vm = container.makeSubscriptionsViewModel()
+        Task { @MainActor in subscriptionsViewModel = vm }
+        return vm
+    }
+
+    private var debtsVM: DebtsViewModel {
+        if let vm = debtsViewModel { return vm }
+        let vm = container.makeDebtsViewModel()
+        Task { @MainActor in debtsViewModel = vm }
+        return vm
+    }
+
+    private var cryptoVM: CryptoViewModel {
+        if let vm = cryptoViewModel { return vm }
+        let vm = container.makeCryptoViewModel()
+        Task { @MainActor in cryptoViewModel = vm }
+        return vm
+    }
+
+    private var statisticsVM: StatisticsViewModel {
+        if let vm = statisticsViewModel { return vm }
+        let vm = container.makeStatisticsViewModel()
+        Task { @MainActor in statisticsViewModel = vm }
+        return vm
     }
 }

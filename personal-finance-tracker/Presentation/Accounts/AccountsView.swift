@@ -1,82 +1,126 @@
 import SwiftUI
 
 struct AccountsView: View {
+    @Bindable var viewModel: AccountsViewModel
+
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.appBackground
                     .ignoresSafeArea()
-                
-                ScrollView {
-                    VStack(spacing: AppSpacing.lg) {
-                        // Accounts Section
-                        SectionCard(
-                            title: "Accounts",
-                            icon: "creditcard.fill",
-                            description: "Manage your bank accounts, wallets, and payment methods"
-                        )
-                        
-                        // Debts Section
-                        SectionCard(
-                            title: "Debts",
-                            icon: "arrow.down.circle.fill",
-                            description: "Track loans, credit cards, and money you owe"
-                        )
-                        
-                        // Subscriptions Section
-                        SectionCard(
-                            title: "Subscriptions",
-                            icon: "repeat.circle.fill",
-                            description: "Monitor recurring payments and subscriptions"
-                        )
+
+                Group {
+                    switch viewModel.state {
+                    case .idle, .loading:
+                        LoadingView(message: "Loading accounts...")
+
+                    case .success(let accounts, let totalBalance):
+                        if accounts.isEmpty {
+                            emptyState
+                        } else {
+                            accountsList(accounts: accounts, totalBalance: totalBalance)
+                        }
+
+                    case .error(let message):
+                        ErrorView(message: message) {
+                            Task { await viewModel.loadAccounts() }
+                        }
                     }
-                    .padding(AppSpacing.lg)
                 }
             }
             .navigationTitle("Accounts")
             .navigationBarTitleDisplayMode(.large)
-        }
-    }
-}
-
-// MARK: - Section Card Component
-
-private struct SectionCard: View {
-    let title: String
-    let icon: String
-    let description: String
-    
-    var body: some View {
-        AppCard {
-            HStack(spacing: AppSpacing.md) {
-                Image(systemName: icon)
-                    .font(.title)
-                    .foregroundStyle(Color.appPrimary)
-                    .frame(width: 48, height: 48)
-                    .background(Color.appSecondary)
-                    .clipShape(RoundedRectangle(cornerRadius: AppRadius.md))
-                
-                VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                    Text(title)
-                        .font(.headline)
-                        .foregroundStyle(Color.appCardForeground)
-                    
-                    Text(description)
-                        .font(.subheadline)
-                        .foregroundStyle(Color.appMutedForeground)
-                        .lineLimit(2)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        viewModel.showAddAccount = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.body.weight(.semibold))
+                    }
                 }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.appMutedForeground)
+            }
+            .sheet(isPresented: $viewModel.showAddAccount) {
+                AddAccountView(viewModel: viewModel)
+            }
+            .task {
+                if case .idle = viewModel.state {
+                    await viewModel.loadAccounts()
+                }
+            }
+            .refreshable {
+                await viewModel.loadAccounts()
             }
         }
     }
-}
 
-#Preview {
-    AccountsView()
+    private func accountsList(accounts: [Account], totalBalance: Double) -> some View {
+        ScrollView {
+            VStack(spacing: AppSpacing.lg) {
+                // Total Balance Header
+                AppCard {
+                    VStack(spacing: AppSpacing.sm) {
+                        Text("Total Balance")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.appMutedForeground)
+
+                        Text(formatCurrency(totalBalance))
+                            .font(.largeTitle.bold())
+                            .foregroundStyle(Color.appForeground)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .padding(.horizontal, AppSpacing.lg)
+
+                // Accounts List
+                VStack(spacing: AppSpacing.sm) {
+                    ForEach(accounts) { account in
+                        NavigationLink(destination: AccountDetailView(account: account, viewModel: viewModel)) {
+                            AppCard {
+                                AccountRow(account: account)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, AppSpacing.lg)
+            }
+            .padding(.vertical, AppSpacing.md)
+        }
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: AppSpacing.md) {
+            Image(systemName: "creditcard.fill")
+                .font(.system(size: 64))
+                .foregroundStyle(Color.appMutedForeground)
+
+            Text("No Accounts Yet")
+                .font(.title2.bold())
+                .foregroundStyle(Color.appForeground)
+
+            Text("Add your first account to start tracking your finances")
+                .font(.subheadline)
+                .foregroundStyle(Color.appMutedForeground)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, AppSpacing.xl)
+
+            AppButton(
+                title: "Add Account",
+                icon: "plus.circle.fill",
+                variant: .primary
+            ) {
+                viewModel.showAddAccount = true
+            }
+            .padding(.top, AppSpacing.sm)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func formatCurrency(_ value: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "MXN"
+        return formatter.string(from: NSNumber(value: value)) ?? "$0.00"
+    }
 }

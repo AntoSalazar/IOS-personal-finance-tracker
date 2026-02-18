@@ -84,6 +84,46 @@ final class APIClient {
         try await performVoid(request)
     }
 
+    // MARK: - PUT Request
+
+    func put<T: Decodable, B: Encodable>(
+        endpoint: String,
+        body: B
+    ) async throws -> T {
+        let url = try buildURL(endpoint: endpoint)
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        applyHeaders(to: &request)
+
+        do {
+            request.httpBody = try encoder.encode(body)
+        } catch {
+            throw NetworkError.encodingError(error)
+        }
+
+        return try await perform(request)
+    }
+
+    // MARK: - PUT Request (No Response Body)
+
+    func put<B: Encodable>(
+        endpoint: String,
+        body: B
+    ) async throws {
+        let url = try buildURL(endpoint: endpoint)
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        applyHeaders(to: &request)
+
+        do {
+            request.httpBody = try encoder.encode(body)
+        } catch {
+            throw NetworkError.encodingError(error)
+        }
+
+        try await performVoid(request)
+    }
+
     // MARK: - DELETE Request
 
     func delete(endpoint: String) async throws {
@@ -104,6 +144,10 @@ final class APIClient {
         request.setValue(AppConfig.apiBaseURL.absoluteString, forHTTPHeaderField: "Origin")
         // Identify as mobile client
         request.setValue("PersonalFinanceTracker-iOS", forHTTPHeaderField: "X-Client-Platform")
+        // Attach auth token if available
+        if let token = TokenStorage.shared.getToken() {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
     }
 
     private func buildURL(
